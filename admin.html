@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>HK Global Blog - Secure Admin Panel</title>
     
-    <!-- Firebase Legacy SDKs (Required for this setup) -->
+    <!-- Firebase Legacy SDKs -->
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
 
@@ -14,11 +14,8 @@
         .admin-container { background: white; padding: 40px; border-radius: 20px; box-shadow: 0 15px 35px rgba(0,0,0,0.1); width: 100%; max-width: 600px; }
         h2 { color: #1a73e8; text-align: center; margin-bottom: 25px; font-size: 1.8em; }
         label { display: block; margin-top: 15px; font-weight: bold; color: #555; }
-        input, textarea, select { width: 100%; padding: 12px; margin-top: 5px; border: 1px solid #ddd; border-radius: 10px; box-sizing: border-box; font-size: 16px; transition: 0.3s; }
-        
-        /* Security field highlighting */
+        input, textarea, select { width: 100%; padding: 12px; margin-top: 5px; border: 1px solid #ddd; border-radius: 10px; box-sizing: border-box; font-size: 16px; }
         #adminPassword { border: 2px solid #1a73e8; background: #f0f7ff; }
-        
         button { background: #1a73e8; color: white; border: none; padding: 15px; width: 100%; margin-top: 25px; cursor: pointer; border-radius: 10px; font-size: 1.1em; font-weight: bold; transition: 0.3s; }
         button:hover { background: #1557b0; transform: translateY(-2px); }
         .status-msg { text-align: center; margin-top: 15px; font-weight: bold; }
@@ -30,18 +27,18 @@
     <h2>🚀 HK Editor Hub</h2>
 
     <label style="color: #1a73e8;">🛡️ Security Access Code</label>
-    <input type="password" id="adminPassword" placeholder="Enter security code to publish...">
+    <input type="password" id="adminPassword" placeholder="Enter security code...">
     
     <hr style="margin: 20px 0; border: 0; border-top: 1px solid #eee;">
 
     <label>Article Title</label>
-    <input type="text" id="title" placeholder="Enter title here...">
+    <input type="text" id="title" placeholder="Enter title...">
 
     <label>Language</label>
     <select id="lang">
-        <option value="en">English (Global)</option>
-        <option value="sv">Svenska (Sweden)</option>
-        <option value="ar">Arabic (العربية)</option>
+        <option value="en">English</option>
+        <option value="sv">Svenska</option>
+        <option value="ar">Arabic</option>
     </select>
 
     <label>Category</label>
@@ -53,17 +50,16 @@
     </select>
 
     <label>Cover Image URL</label>
-    <input type="text" id="imageUrl" placeholder="Paste image link here...">
+    <input type="text" id="imageUrl" placeholder="Paste image link...">
 
     <label>Content</label>
-    <textarea id="content" rows="10" placeholder="Write your thoughts here..."></textarea>
+    <textarea id="content" rows="10" placeholder="Write your content here..."></textarea>
 
     <button onclick="publishArticle()">PUBLISH ARTICLE</button>
     <div id="status" class="status-msg"></div>
 </div>
 
 <script>
-    // Your updated Firebase configuration[cite: 11]
     const firebaseConfig = {
         apiKey: "AIzaSyAJDyKosoysPzOjl-9DqaZIDEg8GRPfXzQ",
         authDomain: "hk-blog-3ed96.firebaseapp.com",
@@ -71,11 +67,9 @@
         storageBucket: "hk-blog-3ed96.firebasestorage.app",
         messagingSenderId: "339658398793",
         appId: "1:339658398793:web:e38a09f83fd01c2e773398",
-        measurementId: "G-FSB1QBLZM7",
-        databaseURL: "https://hk-blog-3ed96-default-rtdb.firebaseio.com" // Crucial for publishing
+        databaseURL: "https://hk-blog-3ed96-default-rtdb.europe-west1.firebasedatabase.app/"
     };
 
-    // Initialize Firebase[cite: 11]
     firebase.initializeApp(firebaseConfig);
     const database = firebase.database();
 
@@ -88,22 +82,18 @@
         const enteredPassword = document.getElementById('adminPassword').value;
         const status = document.getElementById('status');
 
-        // Your private security code[cite: 11]
         const secureCode = "Sabah19920701";
 
-        // Security check first
         if (enteredPassword !== secureCode) {
-            alert("❌ Access Denied: Incorrect Security Code!");
-            status.innerHTML = "Incorrect Security Code!";
+            status.innerHTML = "❌ Incorrect Security Code!";
             status.style.color = "#c0392b";
             return; 
         }
 
         if(title && content) {
-            status.innerHTML = "Sending to the cloud...";
+            status.innerHTML = "Uploading...";
             status.style.color = "#f39c12";
 
-            // Pushing data to Firebase Realtime Database[cite: 11, 13]
             database.ref('posts').push({
                 title: title,
                 lang: lang,
@@ -112,10 +102,8 @@
                 content: content,
                 date: new Date().toLocaleDateString('en-GB')
             }).then(() => {
-                status.innerHTML = "🎉 Article Published Successfully!";
+                status.innerHTML = "🎉 Published Successfully!";
                 status.style.color = "#27ae60";
-                
-                // Clear fields after success[cite: 11]
                 document.getElementById('title').value = '';
                 document.getElementById('content').value = '';
                 document.getElementById('imageUrl').value = '';
@@ -125,10 +113,9 @@
                 status.style.color = "#c0392b";
             });
         } else {
-            alert("Please fill in both the title and content!");
+            alert("Fill all fields!");
         }
     }
 </script>
-
 </body>
 </html>
