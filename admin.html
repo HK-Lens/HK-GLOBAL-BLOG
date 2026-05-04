@@ -3,61 +3,37 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>HK Global Blog - Secure Admin Panel</title>
-    
+    <title>HK Global Blog - Secure Admin</title>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
-
     <style>
-        body { font-family: 'Segoe UI', Tahoma, sans-serif; background: #eef2f7; padding: 20px; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; }
+        body { font-family: sans-serif; background: #eef2f7; padding: 20px; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; }
         .admin-container { background: white; padding: 40px; border-radius: 20px; box-shadow: 0 15px 35px rgba(0,0,0,0.1); width: 100%; max-width: 600px; }
-        h2 { color: #1a73e8; text-align: center; margin-bottom: 25px; font-size: 1.8em; }
-        label { display: block; margin-top: 15px; font-weight: bold; color: #555; }
-        input, textarea, select { width: 100%; padding: 12px; margin-top: 5px; border: 1px solid #ddd; border-radius: 10px; box-sizing: border-box; font-size: 16px; transition: 0.3s; }
-        #adminPassword { border: 2px solid #1a73e8; background: #f0f7ff; }
-        button { background: #1a73e8; color: white; border: none; padding: 15px; width: 100%; margin-top: 25px; cursor: pointer; border-radius: 10px; font-size: 1.1em; font-weight: bold; transition: 0.3s; }
-        button:hover { background: #1557b0; transform: translateY(-2px); }
-        .status-msg { text-align: center; margin-top: 15px; font-weight: bold; }
+        h2 { color: #1a73e8; text-align: center; }
+        input, textarea, select { width: 100%; padding: 12px; margin-top: 10px; border: 1px solid #ddd; border-radius: 10px; box-sizing: border-box; }
+        button { background: #1a73e8; color: white; border: none; padding: 15px; width: 100%; margin-top: 25px; cursor: pointer; border-radius: 10px; font-weight: bold; }
+        #adminPassword { border: 2px solid #1a73e8; }
     </style>
 </head>
 <body>
-
 <div class="admin-container">
-    <h2>🚀 HK Blog Editor</h2>
-
-    <label style="color: #1a73e8;">🛡️ Security Access Code</label>
-    <input type="password" id="adminPassword" placeholder="Enter security code to publish...">
-    
-    <hr style="margin: 20px 0; border: 0; border-top: 1px solid #eee;">
-
-    <label>Post Title</label>
-    <input type="text" id="title" placeholder="Enter post title here...">
-
-    <label>Language</label>
+    <h2>🚀 HK Editor Hub (Blog)</h2>
+    <input type="password" id="adminPassword" placeholder="Security Access Code">
+    <input type="text" id="title" placeholder="Article Title">
     <select id="lang">
-        <option value="en">English (Global)</option>
-        <option value="sv">Swedish (Svenska)</option>
-        <option value="ar">Arabic (العربية)</option>
+        <option value="en">English</option>
+        <option value="sv">Svenska</button>
+        <option value="ar">العربية</option>
     </select>
-
-    <label>Category</label>
     <select id="category">
         <option value="Politics">Politics</option>
         <option value="Economy">Economy</option>
-        <option value="Marketing">Marketing</option>
-        <option value="Family">Family & Lifestyle</option>
     </select>
-
-    <label>Cover Image URL</label>
-    <input type="text" id="imageUrl" placeholder="Paste image link here...">
-
-    <label>Post Content</label>
-    <textarea id="content" rows="10" placeholder="Write your thoughts here..."></textarea>
-
-    <button onclick="publishPost()">PUBLISH POST</button>
-    <div id="status" class="status-msg"></div>
+    <input type="text" id="imageUrl" placeholder="Image Link">
+    <textarea id="content" rows="10" placeholder="Content..."></textarea>
+    <button onclick="publishArticle()">PUBLISH TO BLOG</button>
+    <div id="status" style="text-align:center; margin-top:15px; font-weight:bold;"></div>
 </div>
-
 <script>
     const firebaseConfig = {
         apiKey: "AIzaSyAJDyKosoysPzOjl-9DqaZIDEg8GRPfXzQ",
@@ -66,58 +42,33 @@
         storageBucket: "hk-blog-3ed96.firebasestorage.app",
         messagingSenderId: "339658398793",
         appId: "1:339658398793:web:e38a09f83fd01c2e773398",
+        measurementId: "G-FSB1QBLZM7",
         databaseURL: "https://hk-blog-3ed96-default-rtdb.firebaseio.com"
     };
-
     firebase.initializeApp(firebaseConfig);
     const database = firebase.database();
-
-    function publishPost() {
-        const title = document.getElementById('title').value;
-        const lang = document.getElementById('lang').value;
-        const category = document.getElementById('category').value;
-        const imageUrl = document.getElementById('imageUrl').value;
-        const content = document.getElementById('content').value;
-        const enteredPassword = document.getElementById('adminPassword').value;
+    function publishArticle() {
+        const pass = document.getElementById('adminPassword').value;
         const status = document.getElementById('status');
-
-        const secureCode = "Sabah19920701";
-
-        if (enteredPassword !== secureCode) {
-            alert("❌ Access Denied: Incorrect Security Code!");
-            status.innerHTML = "Incorrect Security Code!";
-            status.style.color = "#c0392b";
-            return;
-        }
-
+        if (pass !== "Sabah19920701") { alert("❌ Wrong Access Code!"); return; }
+        
+        const title = document.getElementById('title').value;
+        const content = document.getElementById('content').value;
         if(title && content) {
-            status.innerHTML = "Sending to the cloud...";
-            status.style.color = "#f39c12";
-
-            const newPostRef = database.ref('posts').push();
-            newPostRef.set({
+            status.innerHTML = "Publishing...";
+            database.ref('posts').push({
                 title: title,
-                lang: lang,
-                category: category,
-                imageUrl: imageUrl,
+                lang: document.getElementById('lang').value,
+                category: document.getElementById('category').value,
+                imageUrl: document.getElementById('imageUrl').value,
                 content: content,
                 date: new Date().toLocaleDateString('en-GB')
             }).then(() => {
-                status.innerHTML = "🎉 Post Published Successfully!";
+                status.innerHTML = "🎉 Done!";
                 status.style.color = "#27ae60";
-                document.getElementById('title').value = '';
-                document.getElementById('content').value = '';
-                document.getElementById('imageUrl').value = '';
-                document.getElementById('adminPassword').value = '';
-            }).catch(err => {
-                status.innerHTML = "❌ Error: " + err.message;
-                status.style.color = "#c0392b";
             });
-        } else {
-            alert("Please fill in the title and content!");
         }
     }
 </script>
-
 </body>
 </html>
