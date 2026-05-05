@@ -3,12 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
     <title>HK LENS | Deep Analysis</title>
     
-    <meta property="og:title" content="HK LENS - Deep Analysis">
-    <meta property="og:description" content="تحليلات سياسية واقتصادية برؤية مستقلة ومقالات معمقة.">
+    <meta property="og:title" content="HK LENS - Global Blog">
+    <meta property="og:description" content="Political and economic analysis with an independent vision.">
     <meta property="og:url" content="https://hk-lens.github.io/HK-GLOBAL-BLOG/">
-    <meta property="og:image" content="https://hk-lens.github.io/HK-GLOBAL-BLOG/cover.jpg">
+    <meta property="og:site_name" content="HK LENS">
     <meta property="og:type" content="website">
 
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
@@ -19,7 +20,10 @@
         body { font-family: 'Segoe UI', Tahoma, sans-serif; margin: 0; background: var(--bg); color: var(--text); line-height: 1.6; }
         
         header { background: var(--white); padding: 20px; border-bottom: 3px solid var(--primary); text-align: center; position: sticky; top: 0; z-index: 1000; box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
-        .site-title { font-size: 1.8em; font-weight: bold; color: var(--primary); margin-bottom: 15px; display: block; text-decoration: none; }
+        
+        /* تصميم شعار HK LENS بشكل بارز */
+        .site-title { font-size: 2em; font-weight: 900; color: var(--primary); text-decoration: none; letter-spacing: 1px; display: block; margin-bottom: 5px; }
+        .site-subtitle { font-size: 0.85em; color: #666; margin-bottom: 15px; font-weight: normal; }
         
         .nav-container { max-width: 800px; margin: auto; padding: 10px; }
         .lang-switch, .category-switch { display: flex; justify-content: center; gap: 8px; margin-bottom: 15px; flex-wrap: wrap; }
@@ -58,6 +62,7 @@
 
 <header>
     <a href="index.html" class="site-title">HK LENS</a>
+    <div class="site-subtitle">GLOBAL ANALYSIS | تحليل عالمي | GLOBAL ANALYS</div>
     <div class="nav-container">
         <div class="lang-switch" id="langSwitch">
             <button onclick="changeLang('ar')" id="btn-ar" class="active">العربية</button>
@@ -85,7 +90,6 @@
 </footer>
 
 <script>
-    // إعدادات Firebase
     const firebaseConfig = {
         apiKey: "AIzaSyAJDyKosoysPzOjl-9DqaZIDEg8GRPfXzQ",
         authDomain: "hk-blog-3ed96.firebaseapp.com",
@@ -192,7 +196,7 @@
                             
                             <div class="share-buttons">
                                 <span style="font-size: 0.85em; color: #666;">مشاركة التحليل:</span>
-                                <a href="https://www.facebook.com/sharer/sharer.php?u=${encodedUrl}" 
+                                <a href="https://www.facebook.com/sharer/sharer.php?u=${encodedUrl}&quote=${encodedTitle}" 
                                    target="_blank" class="share-btn fb-btn">Facebook</a>
                                 <a href="https://api.whatsapp.com/send?text=*${encodedTitle}*%0A${encodedUrl}" 
                                    target="_blank" class="share-btn wa-btn">WhatsApp</a>
