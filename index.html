@@ -6,8 +6,9 @@
     <title>HK LENS | Deep Analysis</title>
     
     <meta property="og:title" content="HK LENS - Deep Analysis">
-    <meta property="og:description" content="Political and economic analysis with an independent vision.">
+    <meta property="og:description" content="تحليلات سياسية واقتصادية برؤية مستقلة ومقالات معمقة.">
     <meta property="og:url" content="https://hk-lens.github.io/HK-GLOBAL-BLOG/">
+    <meta property="og:image" content="https://hk-lens.github.io/HK-GLOBAL-BLOG/cover.jpg">
     <meta property="og:type" content="website">
 
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
@@ -33,7 +34,8 @@
         [dir="ltr"] .post-card { border-right: none; border-left: 5px solid var(--primary); }
 
         .post-header { display: flex; justify-content: space-between; align-items: center; cursor: pointer; }
-        .post-title { font-size: 1.15em; margin: 0; color: #222; flex-grow: 1; }
+        .post-title { font-size: 1.15em; margin: 0; color: #222; flex-grow: 1; text-align: right; }
+        [dir="ltr"] .post-title { text-align: left; }
         .post-meta { font-size: 0.8em; color: #777; margin-top: 4px; }
         
         .post-content { display: none; margin-top: 15px; padding-top: 15px; border-top: 1px solid #eee; animation: fadeIn 0.4s ease; }
@@ -83,6 +85,7 @@
 </footer>
 
 <script>
+    // إعدادات Firebase
     const firebaseConfig = {
         apiKey: "AIzaSyAJDyKosoysPzOjl-9DqaZIDEg8GRPfXzQ",
         authDomain: "hk-blog-3ed96.firebaseapp.com",
@@ -105,9 +108,15 @@
         sv: "Innehållet produceras och förfinas med hjälp av AI-teknik för att säkerställa kvalitet och djupanalys."
     };
 
+    function getPostIdFromUrl() {
+        const params = new URLSearchParams(window.location.search);
+        return params.get('id');
+    }
+
     function changeLang(lang) {
         currentLang = lang;
         document.getElementById('mainHtml').dir = (lang === 'ar') ? 'rtl' : 'ltr';
+        document.getElementById('mainHtml').lang = lang;
         document.getElementById('aiDisclaimer').innerText = disclaimers[lang];
         document.querySelectorAll('#langSwitch button').forEach(b => b.classList.remove('active'));
         document.getElementById('btn-' + lang).classList.add('active');
@@ -121,58 +130,71 @@
         loadPosts();
     }
 
-    function togglePost(card) {
-        const content = card.querySelector('.post-content');
-        const arrow = card.querySelector('.arrow');
+    function togglePost(id) {
+        const content = document.getElementById('content-' + id);
+        const arrow = document.getElementById('arrow-' + id);
         const isOpen = content.style.display === 'block';
+
         document.querySelectorAll('.post-content').forEach(c => c.style.display = 'none');
         document.querySelectorAll('.arrow').forEach(a => a.innerText = '▼');
-        if (!isOpen) { content.style.display = 'block'; arrow.innerText = '▲'; }
+
+        if (!isOpen) {
+            content.style.display = 'block';
+            arrow.innerText = '▲';
+            window.history.pushState({}, '', '?id=' + id);
+        } else {
+            window.history.pushState({}, '', window.location.pathname);
+        }
     }
 
     function loadPosts() {
         const container = document.getElementById('postsContainer');
-        container.innerHTML = '<p style="text-align:center;">Loading...</p>';
+        const targetId = getPostIdFromUrl();
+        container.innerHTML = '<p style="text-align:center;">جاري التحميل...</p>';
         
         database.ref('posts').orderByChild('lang').equalTo(currentLang).on('value', (snapshot) => {
             container.innerHTML = '';
             if (!snapshot.exists()) {
-                container.innerHTML = '<p style="text-align:center;">No posts yet.</p>';
+                container.innerHTML = '<p style="text-align:center;">لا يوجد مقالات حالياً.</p>';
                 return;
             }
 
             let postsArray = [];
             snapshot.forEach((child) => {
                 const post = child.val();
+                post.key = child.key;
                 if (currentCategory === 'All' || post.category === currentCategory) {
                     postsArray.unshift(post);
                 }
             });
 
             postsArray.forEach((post) => {
-                // إنشاء رابط فريد للمقال عبر إضافة عنوانه كمعامل (Param)
-                const baseUrl = window.location.href.split('?')[0];
-                const postUrl = encodeURIComponent(baseUrl + "?article=" + encodeURIComponent(post.title));
-                const postTitle = encodeURIComponent(post.title);
+                const baseUrl = window.location.origin + window.location.pathname;
+                const uniqueUrl = baseUrl + "?id=" + post.key;
+                const encodedUrl = encodeURIComponent(uniqueUrl);
+                const encodedTitle = encodeURIComponent(post.title);
                 
+                const isOpened = (targetId === post.key) ? 'style="display:block;"' : 'style="display:none;"';
+                const arrowIcon = (targetId === post.key) ? '▲' : '▼';
+
                 const postHTML = `
-                    <article class="post-card">
-                        <div class="post-header" onclick="togglePost(this.parentElement)">
+                    <article class="post-card" id="post-${post.key}">
+                        <div class="post-header" onclick="togglePost('${post.key}')">
                             <div>
                                 <h2 class="post-title">${post.title}</h2>
                                 <div class="post-meta">📂 ${post.category} | 📅 ${post.date}</div>
                             </div>
-                            <span class="arrow">▼</span>
+                            <span class="arrow" id="arrow-${post.key}">${arrowIcon}</span>
                         </div>
-                        <div class="post-content">
+                        <div class="post-content" id="content-${post.key}" ${isOpened}>
                             ${post.imageUrl ? `<img src="${post.imageUrl}" alt="${post.title}">` : ''}
-                            <p style="white-space: pre-wrap;">${post.content}</p>
+                            <p style="white-space: pre-wrap; text-align: justify;">${post.content}</p>
                             
                             <div class="share-buttons">
                                 <span style="font-size: 0.85em; color: #666;">مشاركة التحليل:</span>
-                                <a href="https://www.facebook.com/sharer/sharer.php?u=${postUrl}&quote=${postTitle}" 
+                                <a href="https://www.facebook.com/sharer/sharer.php?u=${encodedUrl}" 
                                    target="_blank" class="share-btn fb-btn">Facebook</a>
-                                <a href="https://api.whatsapp.com/send?text=*${postTitle}*%0A${postUrl}" 
+                                <a href="https://api.whatsapp.com/send?text=*${encodedTitle}*%0A${encodedUrl}" 
                                    target="_blank" class="share-btn wa-btn">WhatsApp</a>
                             </div>
                         </div>
@@ -180,6 +202,13 @@
                 `;
                 container.innerHTML += postHTML;
             });
+
+            if (targetId) {
+                setTimeout(() => {
+                    const el = document.getElementById('post-' + targetId);
+                    if (el) el.scrollIntoView({ behavior: 'smooth' });
+                }, 500);
+            }
         });
     }
 
