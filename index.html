@@ -5,15 +5,16 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>HK LENS | Deep Analysis</title>
     
-    <meta property="og:title" content="HK Lens - Deep Analysis">
+    <meta property="og:title" content="HK LENS - Deep Analysis">
     <meta property="og:description" content="Political and economic analysis with an independent vision.">
     <meta property="og:url" content="https://hk-lens.github.io/HK-GLOBAL-BLOG/">
-    
+    <meta property="og:image" content="https://hk-lens.github.io/HK-GLOBAL-BLOG/cover.jpg"> <meta property="og:type" content="website">
+
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
 
     <style>
-        :root { --primary: #1a73e8; --bg: #f8f9fa; --text: #333; --white: #ffffff; }
+        :root { --primary: #1a73e8; --bg: #f8f9fa; --text: #333; --white: #ffffff; --fb: #1877f2; --wa: #25d366; }
         body { font-family: 'Segoe UI', Tahoma, sans-serif; margin: 0; background: var(--bg); color: var(--text); line-height: 1.6; }
         
         header { background: var(--white); padding: 20px; border-bottom: 3px solid var(--primary); text-align: center; position: sticky; top: 0; z-index: 1000; box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
@@ -27,23 +28,27 @@
         
         #postsContainer { max-width: 800px; margin: 20px auto; padding: 0 15px; min-height: 300px; }
         
-        .post-card { background: var(--white); margin-bottom: 12px; padding: 15px; border-radius: 12px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); transition: 0.3s; border-right: 5px solid var(--primary); cursor: pointer; }
+        .post-card { background: var(--white); margin-bottom: 12px; padding: 15px; border-radius: 12px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); transition: 0.3s; border-right: 5px solid var(--primary); }
         .post-card:hover { background: #f0f7ff; }
-        
-        /* ضبط الحواف عند اللغة الإنجليزية والسويدية */
         [dir="ltr"] .post-card { border-right: none; border-left: 5px solid var(--primary); }
 
-        .post-header { display: flex; justify-content: space-between; align-items: center; }
+        .post-header { display: flex; justify-content: space-between; align-items: center; cursor: pointer; }
         .post-title { font-size: 1.15em; margin: 0; color: #222; flex-grow: 1; }
         .post-meta { font-size: 0.8em; color: #777; margin-top: 4px; }
         
         .post-content { display: none; margin-top: 15px; padding-top: 15px; border-top: 1px solid #eee; animation: fadeIn 0.4s ease; }
         .post-content img { max-width: 100%; border-radius: 8px; margin-bottom: 15px; display: block; }
         
+        .share-buttons { margin-top: 20px; padding-top: 15px; border-top: 1px dashed #ddd; display: flex; gap: 10px; align-items: center; }
+        .share-btn { padding: 6px 14px; border-radius: 6px; text-decoration: none; font-size: 0.85em; font-weight: bold; color: white; transition: 0.3s; }
+        .fb-btn { background: var(--fb); }
+        .wa-btn { background: var(--wa); }
+        .share-btn:hover { opacity: 0.8; }
+
         @keyframes fadeIn { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
         
         footer { text-align: center; padding: 40px 20px; background: var(--white); border-top: 1px solid #eee; margin-top: 50px; }
-        .ai-disclaimer { font-size: 0.85em; color: #666; font-style: italic; margin-bottom: 15px; max-width: 600px; margin-left: auto; margin-right: auto; }
+        .ai-disclaimer { font-size: 0.85em; color: #666; font-style: italic; margin-bottom: 15px; }
         .footer-links a { color: var(--primary); text-decoration: none; margin: 0 10px; font-weight: bold; }
     </style>
 </head>
@@ -67,13 +72,10 @@
     </div>
 </header>
 
-<main id="postsContainer">
-    </main>
+<main id="postsContainer"></main>
 
 <footer>
-    <div id="aiDisclaimer" class="ai-disclaimer">
-        يتم إنتاج وتدقيق المحتوى بالاستعانة بتقنيات الذكاء الاصطناعي لضمان الجودة والتحليل العميق.
-    </div>
+    <div id="aiDisclaimer" class="ai-disclaimer">يتم إنتاج وتدقيق المحتوى بالاستعانة بتقنيات الذكاء الاصطناعي لضمان الجودة والتحليل العميق.</div>
     <p>© 2026 HK LENS | Global Analysis</p>
     <div class="footer-links">
         <a href="legal.html">Legal Notice</a> | <a href="privacy.html">Privacy Policy</a>
@@ -81,7 +83,6 @@
 </footer>
 
 <script>
-    // إعدادات Firebase الخاصة بك
     const firebaseConfig = {
         apiKey: "AIzaSyAJDyKosoysPzOjl-9DqaZIDEg8GRPfXzQ",
         authDomain: "hk-blog-3ed96.firebaseapp.com",
@@ -98,7 +99,6 @@
     let currentLang = 'ar';
     let currentCategory = 'All';
 
-    // نصوص التنبيه المترجمة
     const disclaimers = {
         ar: "يتم إنتاج وتدقيق المحتوى بالاستعانة بتقنيات الذكاء الاصطناعي لضمان الجودة والتحليل العميق.",
         en: "Content is produced and refined with the assistance of AI technologies to ensure quality and deep analysis.",
@@ -107,16 +107,10 @@
 
     function changeLang(lang) {
         currentLang = lang;
-        const htmlTag = document.getElementById('mainHtml');
-        htmlTag.dir = (lang === 'ar') ? 'rtl' : 'ltr';
-        htmlTag.lang = lang;
-        
-        // تحديث تنويه الذكاء الاصطناعي في الأسفل
+        document.getElementById('mainHtml').dir = (lang === 'ar') ? 'rtl' : 'ltr';
         document.getElementById('aiDisclaimer').innerText = disclaimers[lang];
-        
         document.querySelectorAll('#langSwitch button').forEach(b => b.classList.remove('active'));
         document.getElementById('btn-' + lang).classList.add('active');
-        
         loadPosts();
     }
 
@@ -131,27 +125,19 @@
         const content = card.querySelector('.post-content');
         const arrow = card.querySelector('.arrow');
         const isOpen = content.style.display === 'block';
-        
-        // إغلاق أي مقال مفتوح آخر لراحة القارئ
         document.querySelectorAll('.post-content').forEach(c => c.style.display = 'none');
         document.querySelectorAll('.arrow').forEach(a => a.innerText = '▼');
-
-        if (!isOpen) {
-            content.style.display = 'block';
-            arrow.innerText = '▲';
-        }
+        if (!isOpen) { content.style.display = 'block'; arrow.innerText = '▲'; }
     }
 
     function loadPosts() {
         const container = document.getElementById('postsContainer');
-        const loadingMsg = { ar: "جاري تحميل العناوين...", en: "Loading titles...", sv: "Laddar titlar..." };
-        container.innerHTML = `<p style="text-align:center;">${loadingMsg[currentLang]}</p>`;
+        container.innerHTML = '<p style="text-align:center;">Loading...</p>';
         
         database.ref('posts').orderByChild('lang').equalTo(currentLang).on('value', (snapshot) => {
             container.innerHTML = '';
             if (!snapshot.exists()) {
-                const noData = { ar: "لا توجد مقالات منشورة حالياً.", en: "No articles published yet.", sv: "Inga artiklar publicerade än." };
-                container.innerHTML = `<p style="text-align:center;">${noData[currentLang]}</p>`;
+                container.innerHTML = '<p style="text-align:center;">No posts yet.</p>';
                 return;
             }
 
@@ -159,23 +145,32 @@
             snapshot.forEach((child) => {
                 const post = child.val();
                 if (currentCategory === 'All' || post.category === currentCategory) {
-                    postsArray.unshift(post); // الأحدث فوق
+                    postsArray.unshift(post);
                 }
             });
 
             postsArray.forEach((post) => {
+                const postUrl = encodeURIComponent(window.location.href);
+                const postTitle = encodeURIComponent(post.title);
+                
                 const postHTML = `
-                    <article class="post-card" onclick="togglePost(this)">
-                        <div class="post-header">
+                    <article class="post-card">
+                        <div class="post-header" onclick="togglePost(this.parentElement)">
                             <div>
                                 <h2 class="post-title">${post.title}</h2>
                                 <div class="post-meta">📂 ${post.category} | 📅 ${post.date}</div>
                             </div>
-                            <span class="arrow" style="color: var(--primary); font-size: 0.9em;">▼</span>
+                            <span class="arrow">▼</span>
                         </div>
                         <div class="post-content">
-                            ${post.imageUrl ? `<img src="${post.imageUrl}" alt="article image">` : ''}
+                            ${post.imageUrl ? `<img src="${post.imageUrl}" alt="Image">` : ''}
                             <p style="white-space: pre-wrap;">${post.content}</p>
+                            
+                            <div class="share-buttons">
+                                <span style="font-size: 0.85em; color: #666;">Share / مشاركة:</span>
+                                <a href="https://www.facebook.com/sharer/sharer.php?u=${postUrl}" target="_blank" class="share-btn fb-btn">Facebook</a>
+                                <a href="https://api.whatsapp.com/send?text=${postTitle}%20${postUrl}" target="_blank" class="share-btn wa-btn">WhatsApp</a>
+                            </div>
                         </div>
                     </article>
                 `;
@@ -184,7 +179,6 @@
         });
     }
 
-    // التحميل الأول عند فتح الصفحة
     window.onload = loadPosts;
 </script>
 </body>
