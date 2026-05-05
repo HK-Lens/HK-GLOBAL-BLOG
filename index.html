@@ -26,6 +26,8 @@
         .post-card { background: var(--white); margin-bottom: 12px; padding: 15px; border-radius: 12px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); transition: 0.3s; border-right: 5px solid var(--primary); cursor: pointer; }
         .post-card:hover { background: #f0f7ff; }
         
+        [dir="ltr"] .post-card { border-right: none; border-left: 5px solid var(--primary); }
+
         .post-header { display: flex; justify-content: space-between; align-items: center; }
         .post-title { font-size: 1.15em; margin: 0; color: #222; flex-grow: 1; }
         .post-meta { font-size: 0.8em; color: #777; margin-top: 4px; }
@@ -36,11 +38,8 @@
         @keyframes fadeIn { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
         
         footer { text-align: center; padding: 40px 20px; background: var(--white); border-top: 1px solid #eee; margin-top: 50px; }
-        .ai-disclaimer { font-size: 0.85em; color: #666; font-style: italic; margin-bottom: 15px; }
+        .ai-disclaimer { font-size: 0.85em; color: #666; font-style: italic; margin-bottom: 15px; max-width: 600px; margin-left: auto; margin-right: auto; }
         .footer-links a { color: var(--primary); text-decoration: none; margin: 0 10px; font-weight: bold; }
-        
-        /* التنسيق عند اللغة الإنجليزية */
-        [dir="ltr"] .post-card { border-right: none; border-left: 5px solid var(--primary); }
     </style>
 </head>
 <body>
@@ -54,7 +53,7 @@
             <button onclick="changeLang('sv')" id="btn-sv">Svenska</button>
         </div>
         <div class="category-switch" id="catSwitch">
-            <button onclick="filterCategory('All')" class="active cat-btn">الكل / All</button>
+            <button onclick="filterCategory('All')" id="btn-all" class="active cat-btn">الكل / All</button>
             <button onclick="filterCategory('Politics')" class="cat-btn">سياسة</button>
             <button onclick="filterCategory('Economy')" class="cat-btn">اقتصاد</button>
             <button onclick="filterCategory('Marketing')" class="cat-btn">تسويق</button>
@@ -63,11 +62,10 @@
     </div>
 </header>
 
-<main id="postsContainer">
-    </main>
+<main id="postsContainer"></main>
 
 <footer>
-    <div class="ai-disclaimer">
+    <div id="aiDisclaimer" class="ai-disclaimer">
         يتم إنتاج وتدقيق المحتوى بالاستعانة بتقنيات الذكاء الاصطناعي لضمان الجودة والتحليل العميق.
     </div>
     <p>© 2026 HK GLOBAL BLOG</p>
@@ -77,7 +75,6 @@
 </footer>
 
 <script>
-    // إعدادات Firebase الخاصة بك
     const firebaseConfig = {
         apiKey: "AIzaSyAJDyKosoysPzOjl-9DqaZIDEg8GRPfXzQ",
         authDomain: "hk-blog-3ed96.firebaseapp.com",
@@ -94,12 +91,21 @@
     let currentLang = 'ar';
     let currentCategory = 'All';
 
-    // تغيير اللغة وتحديث اتجاه الصفحة
+    // نصوص التنبيه باللغات المختلفة
+    const disclaimers = {
+        ar: "يتم إنتاج وتدقيق المحتوى بالاستعانة بتقنيات الذكاء الاصطناعي لضمان الجودة والتحليل العميق.",
+        en: "Content is produced and refined with the assistance of AI technologies to ensure quality and deep analysis.",
+        sv: "Innehållet produceras och förfinas med hjälp av AI-teknik för att säkerställa kvalitet och djupanalys."
+    };
+
     function changeLang(lang) {
         currentLang = lang;
         const htmlTag = document.getElementById('mainHtml');
         htmlTag.dir = (lang === 'ar') ? 'rtl' : 'ltr';
         htmlTag.lang = lang;
+        
+        // تحديث نص التنبيه أسفل الصفحة
+        document.getElementById('aiDisclaimer').innerText = disclaimers[lang];
         
         document.querySelectorAll('#langSwitch button').forEach(b => b.classList.remove('active'));
         document.getElementById('btn-' + lang).classList.add('active');
@@ -107,7 +113,6 @@
         loadPosts();
     }
 
-    // تصفية حسب القسم
     function filterCategory(cat) {
         currentCategory = cat;
         document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('active'));
@@ -115,13 +120,11 @@
         loadPosts();
     }
 
-    // فتح وإغلاق المقال
     function togglePost(card) {
         const content = card.querySelector('.post-content');
         const arrow = card.querySelector('.arrow');
         const isOpen = content.style.display === 'block';
         
-        // إغلاق المقالات الأخرى المفتوحة لسهولة التصفح
         document.querySelectorAll('.post-content').forEach(c => c.style.display = 'none');
         document.querySelectorAll('.arrow').forEach(a => a.innerText = '▼');
 
@@ -131,15 +134,16 @@
         }
     }
 
-    // جلب المقالات من Firebase
     function loadPosts() {
         const container = document.getElementById('postsContainer');
-        container.innerHTML = '<p style="text-align:center;">جاري تحميل العناوين...</p>';
+        const loadingText = { ar: "جاري تحميل العناوين...", en: "Loading titles...", sv: "Laddar titlar..." };
+        container.innerHTML = `<p style="text-align:center;">${loadingText[currentLang]}</p>`;
         
         database.ref('posts').orderByChild('lang').equalTo(currentLang).on('value', (snapshot) => {
             container.innerHTML = '';
             if (!snapshot.exists()) {
-                container.innerHTML = `<p style="text-align:center;">لا توجد مقالات منشورة بهذه اللغة حالياً.</p>`;
+                const noPosts = { ar: "لا توجد مقالات منشورة.", en: "No articles published.", sv: "Inga artiklar publicerade." };
+                container.innerHTML = `<p style="text-align:center;">${noPosts[currentLang]}</p>`;
                 return;
             }
 
@@ -147,14 +151,9 @@
             snapshot.forEach((child) => {
                 const post = child.val();
                 if (currentCategory === 'All' || post.category === currentCategory) {
-                    postsArray.unshift(post); // الأحدث في الأعلى
+                    postsArray.unshift(post);
                 }
             });
-
-            if (postsArray.length === 0) {
-                container.innerHTML = `<p style="text-align:center;">لا توجد مقالات في هذا القسم.</p>`;
-                return;
-            }
 
             postsArray.forEach((post) => {
                 const postHTML = `
@@ -162,12 +161,12 @@
                         <div class="post-header">
                             <div>
                                 <h2 class="post-title">${post.title}</h2>
-                                <div class="post-meta">📁 ${post.category} | 📅 ${post.date}</div>
+                                <div class="post-meta">📂 ${post.category} | 📅 ${post.date}</div>
                             </div>
                             <span class="arrow" style="color: var(--primary); font-size: 0.9em;">▼</span>
                         </div>
                         <div class="post-content">
-                            ${post.imageUrl ? `<img src="${post.imageUrl}" alt="صورة المقال">` : ''}
+                            ${post.imageUrl ? `<img src="${post.imageUrl}" alt="post image">` : ''}
                             <p style="white-space: pre-wrap;">${post.content}</p>
                         </div>
                     </article>
@@ -177,7 +176,6 @@
         });
     }
 
-    // التشغيل الأولي
     window.onload = loadPosts;
 </script>
 </body>
