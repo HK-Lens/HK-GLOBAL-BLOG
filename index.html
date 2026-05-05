@@ -3,7 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>HK GLOBAL BLOG</title>
+    <title>HK LENS | Deep Analysis</title>
+    
+    <meta property="og:title" content="HK Lens - Deep Analysis">
+    <meta property="og:description" content="Political and economic analysis with an independent vision.">
+    <meta property="og:url" content="https://hk-lens.github.io/HK-GLOBAL-BLOG/">
     
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
@@ -26,6 +30,7 @@
         .post-card { background: var(--white); margin-bottom: 12px; padding: 15px; border-radius: 12px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); transition: 0.3s; border-right: 5px solid var(--primary); cursor: pointer; }
         .post-card:hover { background: #f0f7ff; }
         
+        /* ضبط الحواف عند اللغة الإنجليزية والسويدية */
         [dir="ltr"] .post-card { border-right: none; border-left: 5px solid var(--primary); }
 
         .post-header { display: flex; justify-content: space-between; align-items: center; }
@@ -45,7 +50,7 @@
 <body>
 
 <header>
-    <a href="index.html" class="site-title">HK GLOBAL BLOG</a>
+    <a href="index.html" class="site-title">HK LENS</a>
     <div class="nav-container">
         <div class="lang-switch" id="langSwitch">
             <button onclick="changeLang('ar')" id="btn-ar" class="active">العربية</button>
@@ -62,19 +67,21 @@
     </div>
 </header>
 
-<main id="postsContainer"></main>
+<main id="postsContainer">
+    </main>
 
 <footer>
     <div id="aiDisclaimer" class="ai-disclaimer">
         يتم إنتاج وتدقيق المحتوى بالاستعانة بتقنيات الذكاء الاصطناعي لضمان الجودة والتحليل العميق.
     </div>
-    <p>© 2026 HK GLOBAL BLOG</p>
+    <p>© 2026 HK LENS | Global Analysis</p>
     <div class="footer-links">
         <a href="legal.html">Legal Notice</a> | <a href="privacy.html">Privacy Policy</a>
     </div>
 </footer>
 
 <script>
+    // إعدادات Firebase الخاصة بك
     const firebaseConfig = {
         apiKey: "AIzaSyAJDyKosoysPzOjl-9DqaZIDEg8GRPfXzQ",
         authDomain: "hk-blog-3ed96.firebaseapp.com",
@@ -91,7 +98,7 @@
     let currentLang = 'ar';
     let currentCategory = 'All';
 
-    // نصوص التنبيه باللغات المختلفة
+    // نصوص التنبيه المترجمة
     const disclaimers = {
         ar: "يتم إنتاج وتدقيق المحتوى بالاستعانة بتقنيات الذكاء الاصطناعي لضمان الجودة والتحليل العميق.",
         en: "Content is produced and refined with the assistance of AI technologies to ensure quality and deep analysis.",
@@ -104,7 +111,7 @@
         htmlTag.dir = (lang === 'ar') ? 'rtl' : 'ltr';
         htmlTag.lang = lang;
         
-        // تحديث نص التنبيه أسفل الصفحة
+        // تحديث تنويه الذكاء الاصطناعي في الأسفل
         document.getElementById('aiDisclaimer').innerText = disclaimers[lang];
         
         document.querySelectorAll('#langSwitch button').forEach(b => b.classList.remove('active'));
@@ -125,6 +132,7 @@
         const arrow = card.querySelector('.arrow');
         const isOpen = content.style.display === 'block';
         
+        // إغلاق أي مقال مفتوح آخر لراحة القارئ
         document.querySelectorAll('.post-content').forEach(c => c.style.display = 'none');
         document.querySelectorAll('.arrow').forEach(a => a.innerText = '▼');
 
@@ -136,14 +144,14 @@
 
     function loadPosts() {
         const container = document.getElementById('postsContainer');
-        const loadingText = { ar: "جاري تحميل العناوين...", en: "Loading titles...", sv: "Laddar titlar..." };
-        container.innerHTML = `<p style="text-align:center;">${loadingText[currentLang]}</p>`;
+        const loadingMsg = { ar: "جاري تحميل العناوين...", en: "Loading titles...", sv: "Laddar titlar..." };
+        container.innerHTML = `<p style="text-align:center;">${loadingMsg[currentLang]}</p>`;
         
         database.ref('posts').orderByChild('lang').equalTo(currentLang).on('value', (snapshot) => {
             container.innerHTML = '';
             if (!snapshot.exists()) {
-                const noPosts = { ar: "لا توجد مقالات منشورة.", en: "No articles published.", sv: "Inga artiklar publicerade." };
-                container.innerHTML = `<p style="text-align:center;">${noPosts[currentLang]}</p>`;
+                const noData = { ar: "لا توجد مقالات منشورة حالياً.", en: "No articles published yet.", sv: "Inga artiklar publicerade än." };
+                container.innerHTML = `<p style="text-align:center;">${noData[currentLang]}</p>`;
                 return;
             }
 
@@ -151,7 +159,7 @@
             snapshot.forEach((child) => {
                 const post = child.val();
                 if (currentCategory === 'All' || post.category === currentCategory) {
-                    postsArray.unshift(post);
+                    postsArray.unshift(post); // الأحدث فوق
                 }
             });
 
@@ -166,7 +174,7 @@
                             <span class="arrow" style="color: var(--primary); font-size: 0.9em;">▼</span>
                         </div>
                         <div class="post-content">
-                            ${post.imageUrl ? `<img src="${post.imageUrl}" alt="post image">` : ''}
+                            ${post.imageUrl ? `<img src="${post.imageUrl}" alt="article image">` : ''}
                             <p style="white-space: pre-wrap;">${post.content}</p>
                         </div>
                     </article>
@@ -176,6 +184,7 @@
         });
     }
 
+    // التحميل الأول عند فتح الصفحة
     window.onload = loadPosts;
 </script>
 </body>
